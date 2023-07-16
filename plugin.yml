@@ -1,0 +1,16 @@
+---
+name: OpenMM
+version: 0.0.1
+main: MeTooIDK\OpenMM\Main
+api: 5.3.1
+src-namespace-prefix: MeTooIDK\OpenMM
+commands:
+  openmm:
+    description: openmm
+    usage: "/openmm <command>"
+    permission: openmm.permission
+permissions:
+ openmm.permission:
+    description: "OpenMM Command Execution Permission"
+    default: op
+...
