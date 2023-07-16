@@ -14,8 +14,8 @@ use pocketmine\utils\TextFormat;
 
 class Main extends PluginBase
 {
-    private $config;
-    private $maps;
+    public $config;
+    public $maps_data;
 
     private function setupCfg()
     {
@@ -28,12 +28,12 @@ class Main extends PluginBase
          * 
          */
         //
-        $this->maps = array();
+        $this->maps_data = array();
         $this->config->save();
     }
     private function applyConfig()
     {
-        $this->config->set("maps",$this->maps);
+        $this->config->set("maps",$this->maps_data);
         $this->config->save();
         $this->getLogger()->info("Applyed Config");
     }
@@ -47,9 +47,9 @@ class Main extends PluginBase
         $this->saveResource("maps.json");
         $config = new Config($this->getDataFolder() . "maps_data.json", Config::JSON);
         $this->config = $config;
-        $this->maps = $config->get("maps");
-        if (isset($this->maps)) {
-            $this->getLogger()->info(TextFormat::GREEN . "OpenMM Loaded " . count($this->maps) . " Maps");
+        $this->maps_data = $config->get("maps");
+        if (isset($this->maps_data)) {
+            $this->getLogger()->info(TextFormat::GREEN . "OpenMM Loaded " . count($this->maps_data) . " Maps");
         }  else {
             $this->getLogger()->info(TextFormat::YELLOW . "OpenMM Configuration Not Loaded.");
             $this->setupCfg();
@@ -92,7 +92,7 @@ class Main extends PluginBase
                                 $sender->sendMessage(TextFormat::RED . "Please enter a world id");
                                 return false;
                             }
-                            if (isset($this->maps[$worldId])) {
+                            if (isset($this->maps_data[$worldId])) {
                                 $sender->sendMessage(TextFormat::RED . "This world is already in the database");
                                 return true;
                             }
@@ -101,7 +101,7 @@ class Main extends PluginBase
                                 $sender->sendMessage(TextFormat::RED . "World not found");
                                 return false;
                             }
-                            $this->maps[$worldId] = array(
+                            $this->maps_data[$worldId] = array(
                                 "name" => $args[1],
                                 "spawnPoints" => []
                             );
@@ -109,6 +109,26 @@ class Main extends PluginBase
                          } catch (Exception $err) {
                             $sender->sendMessage(TextFormat::RED . TextFormat::BOLD . "OpenMM Error: " . $err->getMessage());
                          }
+                        return true;
+                    case "start":
+                        try {
+                            $round = new MMRound($this);
+                            $worldId = null;
+                            if ($sender instanceof Player) {
+                                $worldId =  $sender->getWorld()->getId();
+                            };
+                            if (isset($args[1])) {
+                                $world = $this->getServer()->getWorldManager()->getWorldByName($args[1]);
+                                if (!isset($world)) {
+                                    throw new Exception("World Not Found");
+                                }
+                                $worldId =  $world->getId();
+                            }
+                            if (!isset($worldId)) throw new Exception("Unknown World");
+                            $round->startRound($worldId);
+                        } catch (Exception $err) {
+                            $sender->sendMessage(TextFormat::RED . TextFormat::BOLD . "OpenMM Error: " . $err->getMessage());
+                        }
                         return true;
                     default:
                         return false;
