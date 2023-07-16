@@ -112,7 +112,7 @@ class Main extends PluginBase
                         return true;
                     case "start":
                         try {
-                            $round = new MMRound($this);
+                          
                             $worldId = null;
                             if ($sender instanceof Player) {
                                 $worldId =  $sender->getWorld()->getId();
@@ -125,7 +125,8 @@ class Main extends PluginBase
                                 $worldId =  $world->getId();
                             }
                             if (!isset($worldId)) throw new Exception("Unknown World");
-                            $round->startRound($worldId);
+                            $round = new MMRound($this,$worldId);
+                            $round->startRound();
                         } catch (Exception $err) {
                             $sender->sendMessage(TextFormat::RED . TextFormat::BOLD . "OpenMM Error: " . $err->getMessage());
                         }
