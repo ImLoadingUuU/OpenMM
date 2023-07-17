@@ -62,13 +62,15 @@ class Main extends PluginBase
         $this->config = $config;
         $this->maps_data = $config->get("maps");
         if (isset($this->maps_data)) {
+            foreach ($this->maps_data as $map) {
+                if (!isset($map["spawnPoints"])) $this->getLogger()->warning(TextFormat::YELLOW . $map["name"] . " SpawnPoints Not Found");
+                if (!isset($map["goldSpawns"])) $this->getLogger()->warning(TextFormat::YELLOW . $map["name"] . " Gold Spawns Not Found");
+            }
             $this->getLogger()->info(TextFormat::GREEN . "OpenMM Loaded " . count($this->maps_data) . " Maps");
         } else {
             $this->getLogger()->info(TextFormat::YELLOW . "OpenMM Configuration Not Loaded.");
             $this->setupCfg();
         }
-        $this->getLogger()->info("Creating Database File");
-        $this->getLogger()->info("OpenMM Enabled");
     }
 
     // command
@@ -110,7 +112,28 @@ class Main extends PluginBase
                                 $sender->sendMessage(TextFormat::YELLOW . " Please use this command in game!");
                                 return false;
                             };
-
+                        case "set_map_gold_spawn":
+                            $worldId = null;
+                            $x = null;
+                            $y = null;
+                            $z = null;
+                            if ($sender instanceof Player) {
+                                $worldId =  $sender->getWorld()->getId();
+                                if (!isset($this->maps_data[$worldId])) throw new Exception("Map Not Found");
+                                $x = $sender->getPosition()->getX();
+                                $y = $sender->getPosition()->getY();
+                                $z = $sender->getPosition()->getZ();
+                                array_push($this->maps_data[$worldId]["goldSpawns"], array(
+                                    "x" => $x,
+                                    "y" => $y,
+                                    "z" => $z
+                                ));
+                                $sender->sendMessage(TextFormat::GREEN . " Created Gold Spawn at {$x},{$y},{$z}");
+                                $sender->sendActionBarMessage(TextFormat::GREEN . " Created Gold Spawn at {$x},{$y},{$z}");
+                                $this->playSonud($sender, "random.orb");
+                                $this->applyConfig();
+                                return true;
+                            }
                         case "newmap":
                             if (!isset($args[1])) {
                                 $sender->sendMessage("§l§cPlease enter a name");
@@ -142,7 +165,8 @@ class Main extends PluginBase
                             }
                             $this->maps_data[$worldId] = array(
                                 "name" => $args[1],
-                                "spawnPoints" => []
+                                "spawnPoints" => [],
+                                "goldSpawns"=> []
                             );
                             $this->applyConfig();
                             return true;
