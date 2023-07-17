@@ -161,7 +161,7 @@ class Main extends PluginBase
                                     $worldId =  $world->getId();
                                 }
                                 if (!isset($worldId)) throw new Exception("Unknown World");
-                                $round = new MMRound($this, $worldId);
+                                $round = new MMRound($this, $worldId,15);
                                 $round->startRound();
                             } catch (Exception $err) {
                                 $sender->sendMessage(TextFormat::RED . TextFormat::BOLD . "OpenMM Error: " . $err->getMessage());
