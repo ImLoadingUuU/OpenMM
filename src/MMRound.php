@@ -6,6 +6,8 @@ use Exception;
 
 use pocketmine\utils\TextFormat;
 use  MeTooIDK\OpenMM\ScoreBoardAPI;
+use pocketmine\event\HandlerList;
+use pocketmine\event\HandlerListManager;
 use pocketmine\item\Item;
 use pocketmine\item\VanillaItems;
 use pocketmine\math\Vector3;
@@ -18,6 +20,7 @@ use pocketmine\updater\UpdateInfo;
 class MMRound
 {
     private $scoreboard;
+    private $currentListener;
     public $timeLeft;
     public Player $murder;
     public Player $detective;
@@ -82,6 +85,12 @@ class MMRound
                 $p->sendTitle(TextFormat::GREEN . "Innocent Won", "The Innocent has killed the murder");
             }
         }
+        // Remove Listener
+     
+    
+    }
+    public function setPlayerAsDead(Player $pickedPlayer){
+        
     }
     public function startRound()
     {
@@ -144,6 +153,9 @@ class MMRound
             }
         };
         $this->currentTask = $this->plugin->getScheduler()->scheduleRepeatingTask(new OpenMMTask($murderPerSec), 20);
-        $this->plugin->getServer()->getPluginManager()->registerEvents(new MMRoundEvents($this), $this->plugin);
+        
+       $this->currentListener = new MMRoundEvents($this);
+       $this->plugin->getServer()->getPluginManager()->registerEvents($this->currentListener, $this->plugin);
+       
     }
 }
